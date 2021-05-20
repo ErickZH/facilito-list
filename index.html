@@ -20,21 +20,28 @@
 
         <h5 class="text-green-600 text-center pt-2 text-4xl">Mis tareas</h5>
 
-        <template x-for="item in tasks">
-            <div class="mt-4 space-y-4">
+        <template x-for="(item, index) in tasks" :key="index">
+            <div class="mt-4 space-y-4" x-show="!item.completed">
                 <div class="flex items-start">
                     <div class="flex items-center h-5">
-                        <input type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                        <input @click="item.completed = true" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
                     </div>
                     <div class="ml-3 text-sm h-5">
-                        <label class="font-medium text-gray-700" x-text="item.title"></label>
+                        <label x-show="!item.edit" class="font-medium text-gray-700" x-text="item.title"></label>
+                        <input x-show="item.edit" type="text" x-model="item.title">
                     </div>
                     <div class="ml-3 flex items-center">
-                        <button class="text-white bg-blue-700 rounded pr-2 pl-2">Editar</button>
-                        <button class="text-white bg-red-700 rounded pr-2 pl-2 ml-4">Eliminar</button>
+                        <button class="text-white bg-blue-700 rounded pr-2 pl-2" @click="!item.edit ? item.edit = true : item.edit = false" x-text="item.edit ? 'Guardar': 'Editar'">Editar</button>
+                        <button class="text-white bg-red-700 rounded pr-2 pl-2 ml-4" @click="deleteTask(index)">Eliminar</button>
                     </div>
                 </div>
             </div>
+        </template>
+
+        <h5 class="text-green-600 text-center pt-2 text-4xl" x-show="hasTasksCompleted()">Tareas Completadas</h5>
+
+        <template x-for="item in tasksCompleted()">
+            <li x-text="item.title" class="line-through"></li>
         </template>
     </div>
 
@@ -43,11 +50,19 @@
             return {
                 task: '',
                 tasks: [],
-                tasksCompleted: [],
                 addTask() {
-                    this.tasks.push({ title: this.task, completed: false});
+                    this.tasks.push({ title: this.task, completed: false, edit: false});
                     this.task = '';
                 },
+                deleteTask(index) {
+                    this.tasks.splice(index, 1);
+                },
+                tasksCompleted() {
+                    return this.tasks.filter((item) => item.completed);
+                },
+                hasTasksCompleted() {
+                    return this.tasksCompleted().length > 0;
+                }
             };
         }
     </script>
